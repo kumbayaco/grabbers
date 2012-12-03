@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>LandGrabbers</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>com.adobe.flexbuilder.project.flexbuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>com.adobe.flexbuilder.project.actionscriptnature</nature>
+	</natures>
+	<linkedResources>
+		<link>
+			<name>[source path] src</name>
+			<type>2</type>
+			<location>E:/coding/opensource/as/BulkLoader/src</location>
+		</link>
+		<link>
+			<name>[source path] starling</name>
+			<type>2</type>
+			<location>E:/coding/opensource/as/Starling/starling/src/starling</location>
+		</link>
+	</linkedResources>
+</projectDescription>
