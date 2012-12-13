@@ -20,8 +20,8 @@ package ui.component
 			super();
 			mouseEnabled = false;
 			
-			_bg = Assets.getBitmap("LoadBarBg");
-			_fr = Assets.getBitmap("LoadBar");
+//			_bg = Assets.getBitmap("LoadBarBg");
+//			_fr = Assets.getBitmap("LoadBar");
 			_mask = new Bitmap(new BitmapData(_bg.width, _bg.height));
 			_mask.bitmapData.draw(_bg);
 			_mask.cacheAsBitmap = true;

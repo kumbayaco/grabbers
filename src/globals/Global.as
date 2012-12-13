@@ -1,4 +1,4 @@
-package
+package globals
 {
 	import br.com.stimuli.loading.BulkLoader;
 
