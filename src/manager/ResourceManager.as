@@ -12,6 +12,7 @@ package manager
 	public class ResourceManager
 	{
 		private var _assets:Dictionary = new Dictionary();
+		private var _cache:Dictionary = new Dictionary();
 		
 		public function ResourceManager() {
 		}
@@ -28,6 +29,11 @@ package manager
 		}
 		
 		public function getBitmapData(url:String, key:String):BitmapData {
+			var tok:String = getCacheToken(url, key);
+			if (_cache[tok] != null) {
+				return _cache[tok] as BitmapData;
+			}
+			
 			if (_assets[url] == null) {
 				Logger.error("asset " + url + " not exist");
 				return null;
@@ -39,7 +45,13 @@ package manager
 				return null;
 			}
 			
-			return new claz() as BitmapData;
+			var data:BitmapData = new claz() as BitmapData;
+			_cache[tok] = data;
+			return data;
 		}		
+		
+		private function getCacheToken(url:String, key:String):String {
+			return url + "/" + key;
+		}
 	}
 }
