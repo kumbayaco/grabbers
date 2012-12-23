@@ -5,6 +5,10 @@ package ui.component
 	import flash.display.Sprite;
 	import flash.events.Event;
 	
+	import globals.Global;
+	
+	import log.Logger;
+	
 //	import starling.textures.Texture;
 	
 	public class Progress extends Sprite
@@ -15,13 +19,18 @@ package ui.component
 		private var _proc:uint = 0;
 		private var _total:uint = 0;
 		
-		public function Progress(proc:uint = 0, total:uint = 100)
+		public function Progress(bg:BitmapData, fr:BitmapData)
 		{
 			super();
+			if (!bg || !fr) {
+				Logger.error("Progress resources not init");
+				return;
+			}
+			
+			_bg = new Bitmap(bg);
+			_fr = new Bitmap(fr);
 			mouseEnabled = false;
 			
-//			_bg = Assets.getBitmap("LoadBarBg");
-//			_fr = Assets.getBitmap("LoadBar");
 			_mask = new Bitmap(new BitmapData(_bg.width, _bg.height));
 			_mask.bitmapData.draw(_bg);
 			_mask.cacheAsBitmap = true;
