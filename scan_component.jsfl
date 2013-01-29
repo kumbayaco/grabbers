@@ -5,28 +5,40 @@ var uriDest = "file:///E|/coding/projects/starling/landgrabbers/bin-debug/resour
 var dirJsfl = fl.scriptURI;
 dirJsfl = dirJsfl.substring(0, dirJsfl.lastIndexOf("/"));
 
-var dirList = scanDir(dirJsfl + "/assets");
+var dirList = [];
+scanDir(dirJsfl + "/assets", "");
 var uriDest = dirJsfl + "/bin-debug/resources";
 
 for (var i = 0; i < dirList.length; i++) {
-	
 	var doc = fl.createDocument();
 	var uri = dirList[i];
-	var temp = uri.split("/");
-	var fileName = temp[temp.length - 1];
+	var temp1 = uri.split("/");
+	var temp2 = (dirJsfl + "/assets").split("/");
+	
+	var fileName = "";
+	for (var j = temp2.length; j < temp1.length; j++) {
+		if (j > temp2.length)
+			fileName += "/";
+		fileName += temp1[j];
+	}
 	
 	fileList = [];
 	itemList = [];
 	
 	scanFile(uri);
-	importToLib(fileList, itemList);
 	
-	fl.trace("export " + uriDest + "/" + fileName + ".swf");
-	doc.exportSWF(uriDest + "/" + fileName + ".swf", true);
-	//fl.saveDocument(doc, uri + "/" + fileName + ".fla");
+	if (itemList.length > 0) {		
+		importToLib(fileList, itemList);
+		fl.trace("export " + uriDest + "/" + fileName + ".swf");
+		
+		var s = uriDest + "/" + fileName + ".swf";
+		validFile(s);
+		doc.exportSWF(s, true);
+		
+		//fl.saveDocument(doc, uri + "/" + fileName + ".fla");		
+	}
 	fl.closeDocument(doc, false);
 }
-
 //if (fl.documents.length==0)
 //	fl.quit();
 
@@ -39,12 +51,38 @@ function scanDir(scanuri)  {
 	for (var i = 0; i<length; i++) {
 		name = scanuri + "/" + file[i];
 		if (FLfile.getAttributes(name) == "D") {
-			dirs.push(name);
+			dirList.push(name);
+			scanDir(name);
 		}
 	}
 	return dirs;
 }
 
+function validFile(uri) {
+	var index = uri.lastIndexOf("/");
+	if (index == -1)
+		return;
+		
+	var dir = uri.substring(0, index);
+	if (FLfile.exists(dir))
+		return;
+	
+	createFolder(dir);
+}
+
+// xxx/xxx
+function createFolder(dir) {
+	var index = dir.lastIndexOf("/");
+	if (index == -1)
+		return;
+		
+	var dirParent = dir.substring(0, index);
+	if (!FLfile.exists(dirParent)) {
+		createFolder(dirParent);
+	}
+	
+	FLfile.createFolder(dir);
+}
 
 function scanFile(scanuri) {
 	var file = FLfile.listFolder(scanuri);
@@ -55,10 +93,10 @@ function scanFile(scanuri) {
 	for (var i = 0; i<length; i++) {
 		name = scanuri + "/" + file[i];
 		if (FLfile.getAttributes(name) == "D") {
-			scanFile(name);
+			//scanFile(name);
 		} else {
 			ext = name.substr(name.length-3, name.length).toLowerCase();
-			if(ext == "jpg" || ext == "png" || ext == "gif" || ext == "mp3"){
+			if(ext == "png" || ext == "mp3"){
 				fileList.push(name);
 				itemList.push(file[i]);
 			}
@@ -70,6 +108,7 @@ function importToLib(fdata, fitem) {
 	var dom = fl.getDocumentDOM();
 	var lib = dom.library;
 	var itemName = "";
+	var itemExt = "";
 	var i = 0;
 	var index = -1;
 	var item;
@@ -83,12 +122,15 @@ function importToLib(fdata, fitem) {
 			fl.trace("import " + fdata[i]);
 		}
 		itemName = fdata[i].replace(uri + "/", "").replace("/", "_");
+		itemExt = itemName.substr(itemName.length-4, 3);
 		itemName = itemName.substr(0, itemName.length - 4);
 		item.name = itemName;
 		item.linkageExportForAS = true;
 		item.linkageExportForRS = true;
 		item.linkageExportInFirstFrame = true;
 		item.linkageClassName = itemName;
+		if (itemExt == "png")
+			item.compressionType = "lossless";
 	}
 }
 
