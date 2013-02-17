@@ -3,7 +3,7 @@ package com.grabbers.ui.model
 	import com.grabbers.globals.App;
 	import com.grabbers.globals.ScriptHelper;
 	import com.grabbers.ui.LayoutUtil;
-	import com.grabbers.ui.component.IHint;
+	import com.grabbers.ui.IHint;
 	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
@@ -41,10 +41,10 @@ package com.grabbers.ui.model
 		
 		//<activeelement name="sign_options" pos="367, 126" size="256, 128" texture_name="sign_options" tex_mask_name="sign_options" 
 		// select_sfx_name="selectmenu" click_sfx_name="clickmenu">
-		override public function init(texPack:String, xml:XML, parentW:uint, parentH:uint):Boolean {
+		override public function init(xml:XML, parentW:uint, parentH:uint, texPack:String):Boolean {
 			
 			// bg
-			_vBmp = App.resourceManager.getButtonBmpdata(texPack, xml.@texture_name);
+			_vBmp = App.resourceManager.getBitmapDataTwin(xml.@texture_name, texPack);
 			if (_vBmp == null)
 				return false;
 			
@@ -60,7 +60,7 @@ package com.grabbers.ui.model
 				var strTex:String = xml.@texture_name;
 				var strMask:String = xml.@tex_mask_name;
 				if (strTex != strMask) {
-					var bmd:BitmapData = App.resourceManager.getBitmapData(texPack, xml.@tex_mask_name);
+					var bmd:BitmapData = App.resourceManager.getBitmapData(xml.@tex_mask_name, texPack);
 					if (bmd != null) {
 						_mask = new BitmapData(_bg.width, _bg.height, true, 0);
 						_mask.draw(bmd, new Matrix(_mask.width/bmd.width, 0, 0, _mask.height/bmd.height));
@@ -111,6 +111,7 @@ package com.grabbers.ui.model
 					if (handlerTrigger != null) {
 						handlerTrigger(this);
 						_curState = UP_STATE;
+						addEventListener(TouchEvent.TOUCH, onTouch);
 					} else {
 						_curState = HOVER_STATE;
 					}

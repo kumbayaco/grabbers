@@ -42,7 +42,6 @@ package com.grabbers.scene
 				}
 			}
 			
-			App.stage.addChildAt(this, 0);
 			return true;
 		}
 		
@@ -54,6 +53,7 @@ package com.grabbers.scene
 				}
 			}
 			
+			App.stage.addChildAt(this, 0);
 			loadProcess = 0;
 			
 			return true;
@@ -62,7 +62,7 @@ package com.grabbers.scene
 		override public function get resources():Array {
 			return [
 				Resources.LOADER_PACK, 
-				Resources.FONTS_PACK,
+				Resources.INTRO_PACK,
 				Resources.CONFIG_FILES
 			];
 		}

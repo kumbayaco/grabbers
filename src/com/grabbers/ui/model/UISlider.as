@@ -25,7 +25,7 @@ package com.grabbers.ui.model
 			size: 			function(str:String, obj:UISlider):void {obj._size = ScriptHelper.parsePoint(str);},
 			pos: 			function(str:String, obj:UISlider):void {obj._pos = ScriptHelper.parsePoint(str);},
 			backtexture:	function(str:String, obj:UISlider):void {
-				var bmd:BitmapData = App.resourceManager.getUniqueBitmapData(str);
+				var bmd:BitmapData = App.resourceManager.getBitmapData(str);
 				if (bmd == null)
 					return;
 				
@@ -35,7 +35,7 @@ package com.grabbers.ui.model
 			},
 			
 			knobtexture:	function(str:String, obj:UISlider):void {
-				var bmps:Vector.<BitmapData> = App.resourceManager.getButtonBmpdata("", str);
+				var bmps:Vector.<BitmapData> = App.resourceManager.getBitmapDataTwin(str);
 				if (bmps == null || bmps.length < 2 || obj._imgBack == null)
 					return;
 				
@@ -70,7 +70,7 @@ package com.grabbers.ui.model
 			super();
 		}
 		
-		override public function init(texPack:String, xml:XML, parentW:uint, parentH:uint):Boolean 
+		override public function init(xml:XML, parentW:uint, parentH:uint, texPack:String):Boolean 
 		{
 			for each (var att:XML in xml.attributes()) {
 				var key:String = att.name().toString();
@@ -86,7 +86,7 @@ package com.grabbers.ui.model
 			return true;
 		}
 		
-		override public function initBasic(vXml:Vector.<XML>, parentW:uint, parentH:uint):Boolean 
+		override public function initBasic(vXml:Vector.<XML>, parentW:uint, parentH:uint, texPack:String):Boolean
 		{
 			if (vXml == null)
 				return true;
@@ -114,14 +114,18 @@ package com.grabbers.ui.model
 		}
 		
 		override public function set width(w:Number):void {
-			_imgBack.width = w;
-			_knobEnd = _imgBack.x + _imgBack.width - _imgKnob.width - 10;
+			if (_imgBack != null)
+				_imgBack.width = w;
+			if (_imgBack != null && _imgKnob != null)
+				_knobEnd = _imgBack.x + _imgBack.width - _imgKnob.width - 10;
 			updateKnobPostion();
 		}
 		
 		override public function set height(h:Number):void {
-			_imgBack.height = h;
-			_imgKnob.y = _imgBack.y + _imgBack.height/2 - _imgKnob.height/2 >> 0 - 5;
+			if (_imgBack != null)
+				_imgBack.height = h;
+			if (_imgBack != null && _imgKnob != null)
+				_imgKnob.y = _imgBack.y + _imgBack.height/2 - _imgKnob.height/2 >> 0 - 5;
 		}
 		
 		protected function onMoveKnob(e:TouchEvent):void {
@@ -155,6 +159,8 @@ package com.grabbers.ui.model
 		}
 		
 		protected function updateKnobPostion():void {
+			if (_imgKnob == null)
+				return;
 			_imgKnob.x = _knobBeg + (_knobEnd - _knobBeg) * _proc / MAX_VALUE;
 		}
 	}

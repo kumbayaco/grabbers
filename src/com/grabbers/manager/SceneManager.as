@@ -2,12 +2,10 @@ package com.grabbers.manager
 {
 	import com.grabbers.globals.App;
 	import com.grabbers.log.Logger;
-	import com.grabbers.scene.AchieveScene;
-	import com.grabbers.scene.BattleScene;
-	import com.grabbers.scene.IScene;
 	import com.grabbers.scene.LoadScene;
 	import com.grabbers.scene.MapScene;
 	import com.grabbers.scene.MenuScene;
+	import com.grabbers.scene.WarScene;
 	import com.grabbers.ui.UIScene;
 	
 	import flash.utils.Dictionary;
@@ -21,7 +19,7 @@ package com.grabbers.manager
 		public static const SCENE_LOAD:uint = 0;
 		public static const SCENE_MENU:uint = 1;
 		public static const SCENE_MAP:uint = 2;
-		public static const SCENE_BATTLE:uint = 3;
+		public static const SCENE_WAR:uint = 3;
 		public static const SCENE_ACHIEVE:uint = 4;
 		
 		private var _scenes:Dictionary = new Dictionary();
@@ -31,8 +29,7 @@ package com.grabbers.manager
 			_scenes[SCENE_LOAD] = new LoadScene();			
 			_scenes[SCENE_MENU] = new MenuScene();
 			_scenes[SCENE_MAP] = new MapScene();
-			_scenes[SCENE_BATTLE] = new BattleScene();
-			_scenes[SCENE_ACHIEVE] = new AchieveScene();
+			_scenes[SCENE_WAR] = new WarScene();
 		}	
 		
 		public function get loadScene():LoadScene {
@@ -45,21 +42,18 @@ package com.grabbers.manager
 				return;
 			}
 			
-			if (_prevScene != null) {
-//				Starling.current.juggler.tween(_prevScene, 0.1, 
-//					{
-//						alpha: 0,
-//						onComplete: function():void {
-							_prevScene.exit();
-//							_scenes[sceneId].alpha = 0;
-							_scenes[sceneId].enter();
-//							Starling.current.juggler.tween(_scenes[sceneId], 0.1, {alpha: 1});
-//						}
-//					});
+			if (_prevScene != null) {				
+				_prevScene.exit();
+				if (sceneId != SCENE_MENU) {
+					_scenes[sceneId].alpha = 0;
+					_scenes[sceneId].enter();
+					Starling.current.juggler.tween(_scenes[sceneId], 1, {alpha: 1});
+				} else {
+					_scenes[sceneId].enter();
+				}
 			} else {
 				_scenes[sceneId].enter();
 			}
-			
 			
 			_prevScene = _scenes[sceneId];
 		}

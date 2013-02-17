@@ -23,7 +23,7 @@ package com.grabbers.ui.model
 			
 		}
 		
-		override public function init(texPack:String, xml:XML, parentW:uint, parentH:uint):Boolean {
+		override public function init(xml:XML, parentW:uint, parentH:uint, texPack:String):Boolean {
 			
 			//<text name="greetings_text" pos="3, 0" text_align="center" font_size="26" text_key="__">
 			update(App.resourceManager.getTextString(xml.@text_key), ScriptHelper.parseNumber(xml.@font_size));
@@ -47,10 +47,11 @@ package com.grabbers.ui.model
 		}
 		
 		public function update(str:String, fontSize:uint):void {
+			if (_img != null && contains(_img))
+				removeChild(_img);
+			
 			_img = App.resourceManager.getTextImage(str);
 			if (_img != null) {			
-//				_img.pivotX = _img.texture.width >> 1;
-//				_img.pivotY = _img.texture.height >> 1;
 				var scale:Number = fontSize / ResourceManager.FONT_HEIGHT;
 				_img.scaleX = _img.scaleY = scale;
 				

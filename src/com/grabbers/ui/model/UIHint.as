@@ -3,7 +3,7 @@ package com.grabbers.ui.model
 	import com.grabbers.globals.App;
 	import com.grabbers.globals.ScriptHelper;
 	import com.grabbers.log.Logger;
-	import com.grabbers.ui.component.IHint;
+	import com.grabbers.ui.IHint;
 	import com.grabbers.ui.component.ScaleImage;
 	
 	import flash.geom.Point;
@@ -57,7 +57,7 @@ package com.grabbers.ui.model
 			texture_theme_name:
 							function(str:String, obj:Object):void {
 								if (_bg == null) {
-									_bg = new ScaleImage(App.resourceManager.getUniqueBitmapData(str), new Rectangle(8, 8, 16, 16));
+									_bg = new ScaleImage(App.resourceManager.getBitmapData(str), new Rectangle(8, 8, 16, 16));
 								}
 							}
 		};
@@ -67,7 +67,7 @@ package com.grabbers.ui.model
 			super();
 		}
 		
-		override public function init(texPack:String, xml:XML, parentW:uint, parentH:uint):Boolean 
+		override public function init(xml:XML, parentW:uint, parentH:uint, texPack:String):Boolean 
 		{
 			/*
 			<basic_hint activator="sign_options" pos="0, -87" size="110, 24" auto_text="false" manual_pos="true" global_pos="false" hint_delay="800">
@@ -91,7 +91,7 @@ package com.grabbers.ui.model
 			return true;
 		}
 		
-		override public function initBasic(vXml:Vector.<XML>, parentW:uint, parentH:uint):Boolean 
+		override public function initBasic(vXml:Vector.<XML>, parentW:uint, parentH:uint, texPack:String):Boolean
 		{
 			if (vXml == null)
 				return true;
@@ -119,7 +119,7 @@ package com.grabbers.ui.model
 						}
 						
 						_text = new UIText();
-						_text.init(null, xml.text[0], _size.x, _size.y);
+						_text.init(xml.text[0], _size.x, _size.y, texPack);
 						break;
 					}
 						
@@ -132,7 +132,7 @@ package com.grabbers.ui.model
 		}
 		
 		public function activate(parent:DisplayObjectContainer):Boolean {
-			if (parent == null)
+			if (parent == null || _activator == null)
 				return false;
 			
 			var activeObj:IHint = parent.getChildByName(_activator) as IHint;
@@ -165,8 +165,8 @@ package com.grabbers.ui.model
 			pivotY = _bg.height >> 1;
 			
 			if (_bGlobalPos || _actObj == null) {
-				x = _pos.x + (App.stage.stageWidth >> 1);
-				y = (App.stage.stageHeight >> 1) - _pos.y;
+				x = _pos.x + (App.sceneWidth >> 1);
+				y = (App.sceneHeight >> 1) - _pos.y;
 			} else {
 				x = _actObj.x + _pos.x;
 				y = _actObj.y - _pos.y;				

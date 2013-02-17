@@ -28,11 +28,11 @@ package com.grabbers.ui.model
 			super();
 		}
 		
-		override public function init(texPack:String, xml:XML, parentW:uint, parentH:uint):Boolean {
+		override public function init(xml:XML, parentW:uint, parentH:uint, texPack:String):Boolean {
 			return true;
 		}
 		
-		override public function initBasic(vXml:Vector.<XML>, parentW:uint, parentH:uint):Boolean {
+		override public function initBasic(vXml:Vector.<XML>, parentW:uint, parentH:uint, texPack:String):Boolean{
 			
 			if (vXml == null)
 				return true;
@@ -58,7 +58,7 @@ package com.grabbers.ui.model
 						
 						for each (var xmlInput:XML in xmlBasic.bitmap) {
 							var bmp:UIBitmap = new UIBitmap();
-							bmp.init(null, xmlInput, _size.x, _size.y);		
+							bmp.init(xmlInput, _size.x, _size.y, texPack);		
 							addChild(bmp);
 							if (bmp.name == "inputbox")
 								_inputBox = bmp;

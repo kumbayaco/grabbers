@@ -16,6 +16,7 @@ package com.grabbers.ui.component
 	{
 		private var _imgs:Vector.<Image> = new Vector.<Image>();
 		private var _scaleRegion:Rectangle;
+		private var _bInit:Boolean = false;
 		
 		public function get border():Point {
 			if (_imgs.length > 0 && _imgs[0] != null)
@@ -23,8 +24,11 @@ package com.grabbers.ui.component
 			return new Point(0, 0);
 		}
 		
-		public function ScaleImage(bmp:BitmapData, scaleRegion:Rectangle) {			
+		public function ScaleImage(bmp:BitmapData, scaleRegion:Rectangle) {		
+			
 			super();
+			if (bmp == null)
+				return;
 			
 			var dx:Array = [scaleRegion.left, scaleRegion.width, bmp.width - scaleRegion.right];
 			var dy:Array = [scaleRegion.top, scaleRegion.height, bmp.height - scaleRegion.bottom];
@@ -57,9 +61,13 @@ package com.grabbers.ui.component
 				addChild(img);
 				_imgs.push(img);
 			}
+			
+			_bInit = true;
 		}
 		
 		override public function set width(w:Number):void {
+			if (!_bInit)
+				return;
 			
 			var u:Number = 0;
 			var uv:Point;
@@ -81,6 +89,8 @@ package com.grabbers.ui.component
 		}
 		
 		override public function set height(h:Number):void {
+			if (!_bInit)
+				return;
 			
 			var v:Number = 0;
 			var uv:Point;

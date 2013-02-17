@@ -6,6 +6,7 @@ package com.grabbers.ui
 	
 	import starling.display.DisplayObjectContainer;
 	import starling.display.Image;
+	import starling.textures.Texture;
 	
 	public class Scale9Image extends DisplayObjectContainer
 	{
@@ -48,8 +49,12 @@ package com.grabbers.ui
 			var u:Number = 0;
 			var v:Number = 0;
 			for (var i:uint = 0; i < 9; i++) {	
-				if (bmps[i] == null)
-					return false;
+				if (bmps[i] == null) {
+					var fakImg:Image = Image.fromBitmap(new Bitmap(new BitmapData(1, 1)));
+					fakImg.width = fakImg.height = 0;
+					_imgs.push(fakImg);
+					continue;
+				}
 								
 				var img:Image = Image.fromBitmap(new Bitmap(bmps[i]));
 				

@@ -7,7 +7,6 @@ package com.grabbers.manager
 	import com.grabbers.globals.Setting;
 	import com.grabbers.log.Logger;
 	import com.grabbers.scene.LoadScene;
-	import com.grabbers.ui.component.AnimateImage;
 	import com.grabbers.ui.component.Progress;
 	import com.greensock.events.LoaderEvent;
 	import com.greensock.loading.DataLoader;
@@ -106,7 +105,7 @@ package com.grabbers.manager
 			_loader.removeEventListener(LoaderEvent.PROGRESS, preProgressListener);
 			_loader.removeEventListener(LoaderEvent.COMPLETE, preCompleteListener);
 			
-			App.resourceManager.parseConfigZip(_loader.getLoader(Resources.CONFIG_FILES).content as ByteArray);
+			App.resourceManager.init(_loader.getLoader(Resources.CONFIG_FILES).content as ByteArray);
 			
 			if (!App.sceneManager.loadScene.init()) {
 				Logger.error("loaderinterface init failed");

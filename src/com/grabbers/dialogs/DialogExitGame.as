@@ -19,7 +19,7 @@ package com.grabbers.dialogs
 			_btnNo = form.getChildByName("no") as UICheckButton;
 			
 			if (_btnYes != null) {
-				_btnYes.handlerTrigger = function(obj:UICheckButton):void {(form.parent as UIScene).execCommand(form.name, "yes");};
+				_btnYes.handlerTrigger = function(obj:UICheckButton):void {(form.parent as UIScene).execCommand(form.name, "yes", {});};
 			}
 			
 			if (_btnNo != null) {

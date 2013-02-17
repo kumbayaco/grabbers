@@ -9,12 +9,12 @@ package com.grabbers.ui.model
 			super();
 		}
 		
-		override public function init(texPack:String, xml:XML, parentW:uint, parentH:uint):Boolean 
+		override public function init(xml:XML, parentW:uint, parentH:uint, texPack:String):Boolean 
 		{
 			return false;
 		}
 		
-		override public function initBasic(vXml:Vector.<XML>, parentW:uint, parentH:uint):Boolean 
+		override public function initBasic(vXml:Vector.<XML>, parentW:uint, parentH:uint, texPack:String):Boolean
 		{
 			return false;
 		}

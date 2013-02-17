@@ -1,9 +1,6 @@
 package com.grabbers.globals
 {
 	import com.grabbers.log.Logger;
-	import com.grabbers.ui.component.AnimateImage;
-	import com.grabbers.ui.component.ButtonHover;
-	import com.grabbers.ui.component.FormElement;
 	import com.grabbers.ui.type.Anchor;
 	
 	import flash.display.BitmapData;
@@ -67,7 +64,7 @@ package com.grabbers.globals
 		
 		static public function parseRect(str:String):Rectangle {
 			var arr:Array = parseDigitArray(str);
-			if (arr.length > 4) {
+			if (arr.length >= 4) {
 				return new Rectangle(arr[0], arr[1], arr[2]-arr[0], arr[3]-arr[1]);
 			}
 			

@@ -12,6 +12,7 @@ package com.grabbers.ui.model
 	import com.grabbers.ui.type.Anchor;
 	
 	import flash.geom.Point;
+	import flash.utils.Dictionary;
 	
 	import starling.animation.Transitions;
 	import starling.core.Starling;
@@ -48,22 +49,24 @@ package com.grabbers.ui.model
 		protected var _ropeL:UIBitmap;
 		protected var _ropeR:UIBitmap;
 		
+		protected var _objMap:Dictionary = new Dictionary();
+		
 		// hide_angle="0" hide_alpha="0.01" effect_time="3000">
 		static protected const _parser:Object = {
-			name:			function(str:String, obj:UIForm):void {obj.name = str;},
-			pos: 			function(str:String, obj:UIForm):void {obj._pos = ScriptHelper.parsePoint(str);},
-			show_angle:		function(str:String, obj:UIForm):void {obj._angle = -deg2rad(ScriptHelper.parseNumber(str));},
-			hide_pos: 		function(str:String, obj:UIForm):void {obj._hidePos = ScriptHelper.parsePoint(str);},
-			hide_scale:		function(str:String, obj:UIForm):void {obj._hideScale = ScriptHelper.parsePoint(str);},
-			hide_angle:		function(str:String, obj:UIForm):void {obj._hideAngle = -deg2rad(ScriptHelper.parseNumber(str));},
-			hide_alpha:		function(str:String, obj:UIForm):void {obj._hideAlpha = ScriptHelper.parseNumber(str);},
-			effect_time:	function(str:String, obj:UIForm):void {obj._effectTime = ScriptHelper.parseNumber(str)/1000; obj._bAnimate = true;},
-			show:			function(str:String, obj:UIForm):void {obj.visible = ScriptHelper.parseBoolean(str);},
-			border:			function(str:String, obj:UIForm):void {obj._border = ScriptHelper.parsePoint(str);},
-			tile_border:	function(str:String, obj:UIForm):void {obj._bBorder = ScriptHelper.parseBoolean(str);},
-			matrix:			function(str:String, obj:UIForm):void {/*obj._bAnimate = ScriptHelper.parseBoolean(str);*/},
-			color:			function(str:String, obj:UIForm):void {obj._color = ScriptHelper.parseColor(str);},
-			size: 			function(str:String, obj:UIForm):void {
+			name:			function(str:String, obj:UIForm, texPack:String):void {obj.name = str;},
+			pos: 			function(str:String, obj:UIForm, texPack:String):void {obj._pos = ScriptHelper.parsePoint(str);},
+			show_angle:		function(str:String, obj:UIForm, texPack:String):void {obj._angle = -deg2rad(ScriptHelper.parseNumber(str));},
+			hide_pos: 		function(str:String, obj:UIForm, texPack:String):void {obj._hidePos = ScriptHelper.parsePoint(str);},
+			hide_scale:		function(str:String, obj:UIForm, texPack:String):void {obj._hideScale = ScriptHelper.parsePoint(str);},
+			hide_angle:		function(str:String, obj:UIForm, texPack:String):void {obj._hideAngle = -deg2rad(ScriptHelper.parseNumber(str));},
+			hide_alpha:		function(str:String, obj:UIForm, texPack:String):void {obj._hideAlpha = ScriptHelper.parseNumber(str);},
+			effect_time:	function(str:String, obj:UIForm, texPack:String):void {obj._effectTime = ScriptHelper.parseNumber(str)/1000; obj._bAnimate = true;},
+			show:			function(str:String, obj:UIForm, texPack:String):void {obj.visible = ScriptHelper.parseBoolean(str);},
+			border:			function(str:String, obj:UIForm, texPack:String):void {obj._border = ScriptHelper.parsePoint(str);},
+			tile_border:	function(str:String, obj:UIForm, texPack:String):void {obj._bBorder = ScriptHelper.parseBoolean(str);},
+			matrix:			function(str:String, obj:UIForm, texPack:String):void {/*obj._bAnimate = ScriptHelper.parseBoolean(str);*/},
+			color:			function(str:String, obj:UIForm, texPack:String):void {obj._color = ScriptHelper.parseColor(str);},
+			size: 			function(str:String, obj:UIForm, texPack:String):void {
 				obj._size = ScriptHelper.parsePoint(str);
 				
 				obj._bgQuad = new Quad(1, 1, 0);
@@ -79,18 +82,18 @@ package com.grabbers.ui.model
 				}
 			},
 			texture_theme_name:
-							function(str:String, obj:UIForm):void {
+							function(str:String, obj:UIForm, texPack:String):void {
 								obj._scaleBg = new Scale9Image();
 								if (!obj._scaleBg.init(	
-										App.resourceManager.getUniqueBitmapData(str+"lu"),
-										App.resourceManager.getUniqueBitmapData(str+"u"),
-										App.resourceManager.getUniqueBitmapData(str+"ru"),
-										App.resourceManager.getUniqueBitmapData(str+"l"),
-										App.resourceManager.getUniqueBitmapData(str+"c"),
-										App.resourceManager.getUniqueBitmapData(str+"r"),
-										App.resourceManager.getUniqueBitmapData(str+"ld"),
-										App.resourceManager.getUniqueBitmapData(str+"d"),
-										App.resourceManager.getUniqueBitmapData(str+"rd")
+										App.resourceManager.getBitmapData(str+"lu", texPack),
+										App.resourceManager.getBitmapData(str+"u", texPack),
+										App.resourceManager.getBitmapData(str+"ru", texPack),
+										App.resourceManager.getBitmapData(str+"l", texPack),
+										App.resourceManager.getBitmapData(str+"c", texPack),
+										App.resourceManager.getBitmapData(str+"r", texPack),
+										App.resourceManager.getBitmapData(str+"ld", texPack),
+										App.resourceManager.getBitmapData(str+"d", texPack),
+										App.resourceManager.getBitmapData(str+"rd", texPack)
 									)) {
 									Logger.error("scale image init failed. " + str);
 									obj._scaleBg = null;
@@ -145,13 +148,16 @@ package com.grabbers.ui.model
 			}
 		}
 		
+		public function getChildObject(name:String):UIObject {
+			if (_objMap[name] == null)
+				return null;
+			return _objMap[name] as UIObject;
+		}
+		
 		protected function onHide():void {
-//			if (contains(_scaleBg))
-//				removeChild(_scaleBg);			
-//			if (contains(_ropeL))
-//				removeChild(_ropeL);
-//			if (contains(_ropeR))
-//				removeChild(_ropeR);
+			if (parent == null)
+				return;
+			
 			parent.removeChild(this); 
 			if (_completeHandler != null) _completeHandler();
 		}
@@ -170,7 +176,7 @@ package com.grabbers.ui.model
 				});
 		}
 		
-		override public function init(texPack:String, xml:XML, parentW:uint, parentH:uint):Boolean 
+		override public function init(xml:XML, parentW:uint, parentH:uint, texPack:String):Boolean 
 		{
 			/*
 			<basic_form name="ingame_save_quit" pos="0, 0" size="300, 172" show="false">
@@ -188,7 +194,7 @@ package com.grabbers.ui.model
 				var key:String = att.name().toString();
 				var val:String = att.toString();
 				if (_parser.hasOwnProperty(key)) {
-					_parser[key](val, this);
+					_parser[key](val, this, texPack);
 				}
 			}
 			
@@ -196,31 +202,34 @@ package com.grabbers.ui.model
 			var xmlList:XMLList = xml.children();
 			for each (var xmlChild:XML in xmlList) {
 				var tagName:String = xmlChild.name();
-				var uiObj:UIObject = UIObjectFactory.createObject(tagName, _size.x, _size.y);
-				if (uiObj == null || !uiObj.init(texPack, xmlChild, _size.x, _size.y))
+				var uiObj:UIObject = UIObjectFactory.createObject(tagName, _size.x, _size.y, texPack);
+				if (uiObj == null || !uiObj.init(xmlChild, _size.x, _size.y, texPack))
 					continue;
 					
-				addChild(uiObj);
+				if (uiObj.visible)
+					addChild(uiObj);
+				uiObj.visible = true;
+				_objMap[uiObj.name] = uiObj;
 			}		
 			
 			
 			// init position
 			var anchor:Anchor = ScriptHelper.parseAnchorType(xml);
 			if (_bAnimate) {
-				LayoutUtil.setLayoutInfo(this, anchor, _pos.x, _pos.y, parentW, parentH);
+				LayoutUtil.setLayoutInfoEx(this, anchor, _pos.x, _pos.y, _size.x, _size.y, parentW, parentH);
 				_pos.x = x;
 				_pos.y = y;
 				
-				LayoutUtil.setLayoutInfo(this, anchor, _hidePos.x, -_hidePos.y, parentW, parentH);
+				LayoutUtil.setLayoutInfoEx(this, anchor, _hidePos.x, -_hidePos.y, _size.x, _size.y, parentW, parentH);
 				_hidePos.x = x;
 				_hidePos.y = y;
 			} else {
-				LayoutUtil.setLayoutInfo(this, anchor, _pos.x, _pos.y, parentW, parentH);
+				LayoutUtil.setLayoutInfoEx(this, anchor, _pos.x, _pos.y, _size.x, _size.y, parentW, parentH);
 				_pos.x = x;
 				_pos.y = y;
 			}			
-			pivotX = _size.x >> 1;
-			pivotY = _size.y >> 1;
+//			pivotX = _size.x >> 1;
+//			pivotY = _size.y >> 1;
 			
 			if (visible) {
 				x = _pos.x;
@@ -236,10 +245,7 @@ package com.grabbers.ui.model
 				// init bg
 				_scaleBg.width = _border.x * 2 + _size.x;
 				_scaleBg.height = _border.y * 2 + _size.y;
-				_scaleBg.pivotX = _scaleBg.width >> 1;
-				_scaleBg.pivotY = _scaleBg.height >> 1;
-				_scaleBg.x = pivotX;
-				_scaleBg.y = pivotY;
+				LayoutUtil.setLayoutInfo(_scaleBg, anchor, 0, 0, _size.x, _size.y);
 				addChildAt(_scaleBg, 0);
 				
 				if (_ropeL != null) {
@@ -260,7 +266,7 @@ package com.grabbers.ui.model
 			return true;
 		}
 		
-		override public function initBasic(vXml:Vector.<XML>, parentW:uint, parentH:uint):Boolean 
+		override public function initBasic(vXml:Vector.<XML>, parentW:uint, parentH:uint, texPack:String):Boolean
 		{
 			if (vXml == null)
 				return true;
@@ -288,14 +294,16 @@ package com.grabbers.ui.model
 							key = att.name().toString();
 							val = att.toString();
 							if (_parser.hasOwnProperty(key)) {
-								_parser[key](val, this);
+								_parser[key](val, this, texPack);
 							}
 						}
 						
 						if (_ropeL == null || _ropeR == null) {
 							for each (var xmlRope:XML in xmlBasic.bitmap) {
 								var bmp:UIBitmap = new UIBitmap();
-								bmp.init(null, xmlRope, _size.x, _size.y);
+								if (!bmp.init(xmlRope, _size.x, _size.y, texPack))
+									continue;
+								
 								bmp.image.texture.repeat = true;
 								if (bmp.name == "left_rope")
 									_ropeL = bmp;
@@ -339,7 +347,7 @@ package com.grabbers.ui.model
 							key = att.name().toString();
 							val = att.toString();
 							if (_parser.hasOwnProperty(key)) {
-								_parser[key](val, this);
+								_parser[key](val, this, texPack);
 							}
 						}
 						
@@ -347,9 +355,8 @@ package com.grabbers.ui.model
 						var xmlList:XMLList = xmlBasic.children();
 						for each (var xmlChild:XML in xmlList) {
 							var tagName:String = xmlChild.name();
-							var uiObj:UIObject = UIObjectFactory.createObject(tagName, parentW, parentH);
-							var vXmls:Vector.<XML> = UIObjectFactory.getObjectBasicXml(tagName);
-							if (uiObj == null || !uiObj.init(null, xmlChild, _size.x, _size.y))
+							var uiObj:UIObject = UIObjectFactory.createObject(tagName, parentW, parentH, texPack);
+							if (uiObj == null || !uiObj.init(xmlChild, _size.x, _size.y, texPack))
 								continue;
 							
 							addChild(uiObj);

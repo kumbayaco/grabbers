@@ -66,7 +66,7 @@ package com.grabbers.ui.component
 			var str:String;
 			params["name"] = (str = xml.@name);
 			
-			var bmd:BitmapData = App.resourceManager.getHostBitmapData(xml.@image);
+			var bmd:BitmapData = App.resourceManager.getBitmapData(xml.@image);
 			if (bmd == null) {
 				return null;
 			}

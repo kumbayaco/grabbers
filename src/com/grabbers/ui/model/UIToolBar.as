@@ -21,24 +21,24 @@ package com.grabbers.ui.model
 	{
 		// hide_angle="0" hide_alpha="0.01" effect_time="3000">
 		static protected const _parser:Object = {
-			name:			function(str:String, obj:UIToolBar):void {obj.name = str;},
-			pos: 			function(str:String, obj:UIToolBar):void {obj._pos = ScriptHelper.parsePoint(str);},
-			show_angle:		function(str:String, obj:UIToolBar):void {obj._angle = -deg2rad(ScriptHelper.parseNumber(str));},
-			hide_pos: 		function(str:String, obj:UIToolBar):void {obj._hidePos = ScriptHelper.parsePoint(str);},
-			hide_scale:		function(str:String, obj:UIToolBar):void {obj._hideScale = ScriptHelper.parsePoint(str);},
-			hide_angle:		function(str:String, obj:UIToolBar):void {obj._hideAngle = -deg2rad(ScriptHelper.parseNumber(str));},
-			hide_alpha:		function(str:String, obj:UIToolBar):void {obj._hideAlpha = ScriptHelper.parseNumber(str);},
-			effect_time:	function(str:String, obj:UIToolBar):void {obj._effectTime = ScriptHelper.parseNumber(str)/1000; obj._bAnimate = true;},
-			show:			function(str:String, obj:UIToolBar):void {obj.visible = ScriptHelper.parseBoolean(str);},
-			center_items:	function(str:String, obj:UIToolBar):void {obj._bCenter = ScriptHelper.parseBoolean(str);},
-			border:			function(str:String, obj:UIToolBar):void {obj._border = ScriptHelper.parsePoint(str);},
-			tile_border:	function(str:String, obj:UIToolBar):void {obj._bBorder = ScriptHelper.parseBoolean(str);},
-			vertical:		function(str:String, obj:UIToolBar):void {obj._bVertical = ScriptHelper.parseBoolean(str);},
-			matrix:			function(str:String, obj:UIToolBar):void {/*obj._bAnimate = ScriptHelper.parseBoolean(str);*/},
-			name_items:		function(str:String, obj:UIToolBar):void {obj._itemButtonType = str;},
-			select_sfx_name:function(str:String, obj:UIToolBar):void {obj._sfxHover = str;},
-			click_sfx_name:	function(str:String, obj:UIToolBar):void {obj._sfxClick = str;},
-			size: 			function(str:String, obj:UIToolBar):void {
+			name:			function(str:String, obj:UIToolBar, texPack:String):void {obj.name = str;},
+			pos: 			function(str:String, obj:UIToolBar, texPack:String):void {obj._pos = ScriptHelper.parsePoint(str);},
+			show_angle:		function(str:String, obj:UIToolBar, texPack:String):void {obj._angle = -deg2rad(ScriptHelper.parseNumber(str));},
+			hide_pos: 		function(str:String, obj:UIToolBar, texPack:String):void {obj._hidePos = ScriptHelper.parsePoint(str);},
+			hide_scale:		function(str:String, obj:UIToolBar, texPack:String):void {obj._hideScale = ScriptHelper.parsePoint(str);},
+			hide_angle:		function(str:String, obj:UIToolBar, texPack:String):void {obj._hideAngle = -deg2rad(ScriptHelper.parseNumber(str));},
+			hide_alpha:		function(str:String, obj:UIToolBar, texPack:String):void {obj._hideAlpha = ScriptHelper.parseNumber(str);},
+			effect_time:	function(str:String, obj:UIToolBar, texPack:String):void {obj._effectTime = ScriptHelper.parseNumber(str)/1000; obj._bAnimate = true;},
+			show:			function(str:String, obj:UIToolBar, texPack:String):void {obj.visible = ScriptHelper.parseBoolean(str);},
+			center_items:	function(str:String, obj:UIToolBar, texPack:String):void {obj._bCenter = ScriptHelper.parseBoolean(str);},
+			border:			function(str:String, obj:UIToolBar, texPack:String):void {obj._border = ScriptHelper.parsePoint(str);},
+			tile_border:	function(str:String, obj:UIToolBar, texPack:String):void {obj._bBorder = ScriptHelper.parseBoolean(str);},
+			vertical:		function(str:String, obj:UIToolBar, texPack:String):void {obj._bVertical = ScriptHelper.parseBoolean(str);},
+			matrix:			function(str:String, obj:UIToolBar, texPack:String):void {/*obj._bAnimate = ScriptHelper.parseBoolean(str);*/},
+			name_items:		function(str:String, obj:UIToolBar, texPack:String):void {obj._itemButtonType = str;},
+			select_sfx_name:function(str:String, obj:UIToolBar, texPack:String):void {obj._sfxHover = str;},
+			click_sfx_name:	function(str:String, obj:UIToolBar, texPack:String):void {obj._sfxClick = str;},
+			size: 			function(str:String, obj:UIToolBar, texPack:String):void {
 				obj._size = ScriptHelper.parsePoint(str);
 				if (obj._type == BASIC_V_BAR && obj._bgQuad != null) {
 					obj._bgQuad.width = obj._size.x;
@@ -48,18 +48,18 @@ package com.grabbers.ui.model
 				}
 			},
 			texture_theme_name:
-				function(str:String, obj:UIForm):void {
+				function(str:String, obj:UIForm, texPack:String):void {
 					obj._scaleBg = new Scale9Image();
 					obj._scaleBg.init(	
-						App.resourceManager.getUniqueBitmapData(str+"lu"),
-						App.resourceManager.getUniqueBitmapData(str+"u"),
-						App.resourceManager.getUniqueBitmapData(str+"ru"),
-						App.resourceManager.getUniqueBitmapData(str+"l"),
-						App.resourceManager.getUniqueBitmapData(str+"c"),
-						App.resourceManager.getUniqueBitmapData(str+"r"),
-						App.resourceManager.getUniqueBitmapData(str+"ld"),
-						App.resourceManager.getUniqueBitmapData(str+"d"),
-						App.resourceManager.getUniqueBitmapData(str+"rd")
+						App.resourceManager.getBitmapData(str+"lu", texPack),
+						App.resourceManager.getBitmapData(str+"u", texPack),
+						App.resourceManager.getBitmapData(str+"ru", texPack),
+						App.resourceManager.getBitmapData(str+"l", texPack),
+						App.resourceManager.getBitmapData(str+"c", texPack),
+						App.resourceManager.getBitmapData(str+"r", texPack),
+						App.resourceManager.getBitmapData(str+"ld", texPack),
+						App.resourceManager.getBitmapData(str+"d", texPack),
+						App.resourceManager.getBitmapData(str+"rd", texPack)
 					);
 				}
 		};
@@ -95,7 +95,7 @@ package com.grabbers.ui.model
 			super();
 		}
 		
-		override public function init(texPack:String, xml:XML, parentW:uint, parentH:uint):Boolean 
+		override public function init(xml:XML, parentW:uint, parentH:uint, texPack:String):Boolean 
 		{
 			// init position
 			var anchor:Anchor = ScriptHelper.parseAnchorType(xml);
@@ -126,7 +126,7 @@ package com.grabbers.ui.model
 			if (_scaleBg != null) {
 				// init bg
 				var border:Point = _scaleBg.border;
-				_scaleBg.width = border.x * 2 + _size.x;
+				_scaleBg.width = border.x * 2 + _size.x + 40;
 				_scaleBg.height = border.y * 2 + height;
 				_scaleBg.pivotX = _scaleBg.width >> 1;
 				_scaleBg.pivotY = _scaleBg.height >> 1;
@@ -152,7 +152,7 @@ package com.grabbers.ui.model
 			return true;
 		}
 		
-		override public function initBasic(vXml:Vector.<XML>, parentW:uint, parentH:uint):Boolean 
+		override public function initBasic(vXml:Vector.<XML>, parentW:uint, parentH:uint, texPack:String):Boolean
 		{
 			if (vXml == null)
 				return true;
@@ -177,14 +177,16 @@ package com.grabbers.ui.model
 							key = att.name().toString();
 							val = att.toString();
 							if (_parser.hasOwnProperty(key)) {
-								_parser[key](val, this);
+								_parser[key](val, this, texPack);
 							}
 						}
 						
 						if (_ropeL == null || _ropeR == null) {
 							for each (var xmlRope:XML in xmlBasic.bitmap) {
 								var bmp:UIBitmap = new UIBitmap();
-								bmp.init(null, xmlRope, _size.x, _size.y);
+								if (!bmp.init(xmlRope, _size.x, _size.y, texPack))
+									continue;
+								
 								bmp.image.texture.repeat = true;
 								if (bmp.name == "left_rope")
 									_ropeL = bmp;
@@ -206,7 +208,7 @@ package com.grabbers.ui.model
 							key = att.name().toString();
 							val = att.toString();
 							if (_parser.hasOwnProperty(key)) {
-								_parser[key](val, this);
+								_parser[key](val, this, texPack);
 							}
 						}
 						break;
@@ -228,7 +230,7 @@ package com.grabbers.ui.model
 							key = att.name().toString();
 							val = att.toString();
 							if (_parser.hasOwnProperty(key)) {
-								_parser[key](val, this);
+								_parser[key](val, this, texPack);
 							}
 						}
 						
@@ -246,7 +248,7 @@ package com.grabbers.ui.model
 										if (ss == "")
 											continue;
 										
-										var btn:UICheckButton = UIObjectFactory.createObject(_itemButtonType, parentW, parentH) as UICheckButton;
+										var btn:UICheckButton = UIObjectFactory.createObject(_itemButtonType, parentW, parentH, texPack) as UICheckButton;
 										if (btn == null)
 											continue;
 										
@@ -265,8 +267,8 @@ package com.grabbers.ui.model
 									break;
 								
 								default:
-									var uiObj:UIObject = UIObjectFactory.createObject(tagName, parentW, parentH);
-									if (uiObj == null || !uiObj.init(null, xmlChild, _size.x, _size.y))
+									var uiObj:UIObject = UIObjectFactory.createObject(tagName, parentW, parentH, texPack);
+									if (uiObj == null || !uiObj.init(xmlChild, _size.x, _size.y, texPack))
 										continue;
 									
 									uiObj.x = 0;

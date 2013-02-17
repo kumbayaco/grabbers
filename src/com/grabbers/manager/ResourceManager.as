@@ -1,10 +1,18 @@
 package com.grabbers.manager
 {	
+	import com.grabbers.globals.App;
 	import com.grabbers.globals.Resources;
 	import com.grabbers.globals.ScriptHelper;
 	import com.grabbers.log.Logger;
+	import com.grabbers.manager.host.AnimateManager;
+	import com.grabbers.manager.host.ControlManager;
+	import com.grabbers.manager.host.ImageManager;
+	import com.grabbers.manager.host.ParticleManager;
+	import com.grabbers.manager.host.TexPackManager;
+	import com.grabbers.ui.AnimateObject;
 	import com.grabbers.ui.UIObjectFactory;
 	import com.grabbers.ui.component.Particle;
+	import com.grabbers.warzone.ArmyUnit;
 	import com.greensock.loading.core.LoaderCore;
 	
 	import deng.fzip.FZip;
@@ -35,11 +43,8 @@ package com.grabbers.manager
 		
 		private var _swfAssets:Dictionary = new Dictionary();
 		private var _zipAssets:Dictionary = new Dictionary();
-		private var _cacheTexAtlas:Dictionary = new Dictionary();
 		private var _cacheTex:Dictionary = new Dictionary();
-		private var _cacheTexUnique:Dictionary = new Dictionary();
 		private var _cacheBmd:Dictionary = new Dictionary();
-		private var _cacheBmdUnique:Dictionary = new Dictionary();
 		private var _cacheSound:Dictionary = new Dictionary();	
 		private var _cacheString:Dictionary;
 		private var _spriteAssetsXml:Dictionary = new Dictionary();
@@ -47,8 +52,12 @@ package com.grabbers.manager
 		private var _cursor:BitmapData;
 		private var _fontRcDict:Dictionary;
 		private var _cachePartHost:Dictionary;
-		private var _cacheBmdHost:Dictionary;
-		private var _cacheAnimHost:Dictionary;
+		
+		private var _animManager:AnimateManager = new AnimateManager();
+		private var _texPackManager:TexPackManager = new TexPackManager();
+		private var _controlManager:ControlManager = new ControlManager();
+		private var _gfxManager:ParticleManager = new ParticleManager();
+		private var _imgManager:ImageManager = new ImageManager();
 		
 		public static const FONTSTRING:String = 
 										 " !\"#$%&'()*+,-./0123456789:;<=>?" + 
@@ -89,12 +98,28 @@ package com.grabbers.manager
 			zipNew.loadBytes(data);
 			_zipAssets[name] = zipNew;
 		}
-			
 		
-		public function parseConfigZip(data:ByteArray):Boolean {
+		public function init(data:ByteArray):Boolean {
 			_configZip = new FZip();
 			_configZip.loadBytes(data);
-			_cursor = getBitmapData(Resources.FONTS_PACK, "cursor");
+			
+			// components
+			UIObjectFactory.init();
+			
+			// hosts
+			if (!_animManager.init())
+				return false;
+			if (!_texPackManager.init())
+				return false;
+			if (!_controlManager.init())
+				return false;
+			if (!_gfxManager.init())
+				return false;
+			if (!_imgManager.init())
+				return false;
+			
+			// init cursor
+			_cursor = getBitmapData("cursor", Resources.INTRO_PACK);
 			if (_cursor != null) {
 				var cursorData:MouseCursorData = new MouseCursorData();
 				cursorData.data = new Vector.<BitmapData>();
@@ -108,50 +133,102 @@ package com.grabbers.manager
 				Mouse.cursor = MouseCursor.ARROW;
 			}
 			
-			UIObjectFactory.init();
+			App.levelManager.init();
 			return true;
 		}
 		
 		public function getConfigXml(url:String):String {
 			var fzipFile:FZipFile = _configZip.getFileByName(url);
-			if (fzipFile == null)
-				return null;
+			if (fzipFile == null) {
+				Logger.error("script " + url + " not found");
+				return null;	
+			}
 			//var cont:String = fzipFile.content.readMultiByte(fzipFile.content.bytesAvailable, "unicode");
 			return fzipFile.getContentAsString(false, "unicode");
 		}
 		
-		public function getTexture(url:String, key:String):Texture {
-			var tex:Texture = getUniqueTexture(key);
-			if (tex != null)
-				return tex;
+		public function getBitmapData(key:String, packName:String = TexPackManager.PACK_DEFAULT, mask:uint = 0):BitmapData {
+			if (_cacheBmd[key] != null)
+				return _cacheBmd[key] as BitmapData;
+			
+			var packs:Array = _texPackManager.getPacks(packName);
+			if (packs == null) {
+				packs = new Array();
+			}			
+			
+			var packdef:Array = _texPackManager.getPacks(TexPackManager.PACK_DEFAULT);
+			for each (var x:String in packdef) {
+				if (packs.indexOf(x) < 0)
+					packs.push(x);
+			}
+			
+			// check if it's a standalone picture
+			for each (var asset:String in packs) {
+				if (_swfAssets[asset] == null) {
+					continue;
+				}
 				
-			var texTok:String = getCacheToken(url, key);
-			if (_cacheTex[texTok] != null) {
-				return _cacheTex[texTok] as Texture;
+				var claz:Class;
+				try {
+					claz = (_swfAssets[asset] as ApplicationDomain).getDefinition(key) as Class;
+				} catch (e:Error) {
+					continue;
+				}
+				
+				if (claz == null) {
+					Logger.error(key + " in " + asset + " is a null class");
+					return null;
+				}
+				
+				var bmd:BitmapData = new claz() as BitmapData;
+				if (bmd == null) {
+					Logger.error("definition " + key + " in " + asset + " is not a image data");
+					return null;
+				}
+				
+				if (mask != 0) {
+					var _rcReal:Rectangle = bmd.getColorBoundsRect(mask, 0, false);
+					var bmdReal:BitmapData = new BitmapData(_rcReal.width, _rcReal.height);
+					bmdReal.copyPixels(bmd, _rcReal, new Point());
+					bmd = bmdReal;
+				}
+				
+				_cacheBmd[key] = bmd;
+				return bmd;
 			}
 			
-			var bmd:BitmapData = getBitmapData(url, key);
-			if (bmd == null) {
-				return null;
+			// check if it's a subtexture
+			var bmdHost:BitmapData = _imgManager.getHostBitmapData(key);
+			if (bmdHost != null) {
+				_cacheBmd[key] = bmdHost;
+				return bmdHost;
 			}
-			_cacheTex[texTok] = Texture.fromBitmapData(bmd, false);
 			
-			return _cacheTex[texTok] as Texture;
+			Logger.error(key + " not found in any asset");
+			return null;
 		}
 		
-		public function getButtonBmpdata(url:String, key:String):Vector.<BitmapData> {
-			
-			var tokUp:String = getCacheToken(url, key, "up");
-			var tokDown:String = getCacheToken(url, key, "down");
+		public function getTexture(key:String, packName:String = TexPackManager.PACK_DEFAULT):Texture {
+			 if (_cacheTex[key] != null)
+				 return _cacheTex[key] as Texture;
+			 
+			 var bmd:BitmapData = getBitmapData(key, packName);
+			 if (bmd == null)
+				 return null;
+			 
+			 _cacheTex[key] = Texture.fromBitmapData(bmd, false);
+			 return _cacheTex[key] as Texture;
+		}
+		
+		public function getBitmapDataTwin(key:String, packName:String = TexPackManager.PACK_DEFAULT):Vector.<BitmapData> {
+						
+			var tokUp:String = key + "_up";
+			var tokDown:String = key + "down";
 			var bmpUp:BitmapData = _cacheBmd[tokUp];
 			var bmpDown:BitmapData = _cacheBmd[tokDown];
 			
 			if (bmpUp == null || bmpDown == null) {			
-				var bmpAll:BitmapData;
-				if (url == "" || url == null)
-					bmpAll = getUniqueBitmapData(key);
-				else
-					bmpAll = getBitmapData(url, key);
+				var bmpAll:BitmapData = getBitmapData(key, packName);
 				
 				if (bmpAll == null)
 					return null;
@@ -175,44 +252,12 @@ package com.grabbers.manager
 			return vBmd;
 		}
 		
-		public function getAnim(key:String):MovieClip {
-			if (_cacheAnimHost == null) {
-				_cacheAnimHost = new Dictionary();
-				var xml:XML = new XML(getConfigXml("scripts/hosts/animationhost.txt"));
-				for each (var xmlAnim:XML in xml.animation) {
-					//<animation name="fireworks_anim" start_frame="24" end_frame="31" animation_time="0.5" delta_pos="0, 128" frame_size="128, 128" texname="magic_anim3">					
-					var texAnim:Texture = getTexture(Resources.ANIMATION_PACK, xmlAnim.@texname);
-					if (texAnim == null)
-						continue;
-					
-					var size:Point = ScriptHelper.parsePoint(xmlAnim.@frame_size);
-					var delta:Point = ScriptHelper.parsePoint(xmlAnim.@delta_pos); //unknown
-					var startFr:Number = ScriptHelper.parseNumber(xmlAnim.@start_frame);
-					var endFr:Number = ScriptHelper.parseNumber(xmlAnim.@end_frame);
-					var time:Number = ScriptHelper.parseNumber(xmlAnim.@animation_time);
-					
-					var nw:uint = texAnim.width / size.x >> 0;
-					var nh:uint = texAnim.height / size.y >> 0;
-					
-					var vTex:Vector.<Texture> = new Vector.<Texture>();
-					for (var fr:uint = startFr; fr <= endFr; fr++) {
-						var x:uint = fr % nw;
-						var y:uint = fr / nw >> 0;
-						var tex:Texture = Texture.fromTexture(texAnim, new Rectangle(x*size.x, y*size.y, size.x, size.y));
-						vTex.push(tex);
-					}
-					
-					var mc:MovieClip = new MovieClip(vTex, vTex.length / time >> 0);
-					
-					var str:String = xmlAnim.@name;
-					_cacheAnimHost[str] = mc;
-				}
-			}
-			
-			if (_cacheAnimHost[key] == null)
-				return null;
-			
-			return _cacheAnimHost[key] as MovieClip;
+		public function getAnim(key:String):AnimateObject {
+			return _animManager.getAnim(key);
+		}
+		
+		public function getUnitAnim(type:uint, owner:uint, bFlag:Boolean):ArmyUnit {
+			return _animManager.getUnitAnim(type, owner, bFlag);
 		}
 		
 		public function getTextString(key:String):String {
@@ -294,45 +339,9 @@ package com.grabbers.manager
 			return _cachePartHost[str];
 		}
 		
-		//<image name="particle_zap" texture="particles" rect="65, 1, 127, 63">
-		public function getHostBitmapData(name:String):BitmapData {
-			if (_cacheBmdHost == null) {
-				var fzipFile:FZipFile = _configZip.getFileByName("scripts/host/imagehost.txt");
-				if (fzipFile == null) {
-					Logger.error("open scripts/host/imagehost.txt failed");
-					return null;
-				}
-				
-				_cacheBmdHost = new Dictionary();
-				var str:String = fzipFile.getContentAsString(false, "unicode");
-				var xml:XML = new XML(str);
-				var rect:Rectangle = new Rectangle();
-				var arr:Array;
-				for each (var partXml:XML in xml.image) {
-					var bmdTex:BitmapData = getBitmapData(Resources.GUI_PACK, partXml.@texture);
-					if (bmdTex == null) {
-						continue;
-					}
-					
-					arr = ScriptHelper.parseDigitArray(xml.@rect);
-					rect.setTo(arr[0], arr[1], arr[2]-arr[0], arr[3]-arr[1]);
-					var bmdHost:BitmapData = new BitmapData(rect.width, rect.height, true, 0);
-					bmdHost.copyPixels(bmdTex, rect, new Point(0,0));
-						
-					_cacheBmdHost[partXml.@name] = bmdHost;
-				}
-			}
-			
-			if (_cacheBmdHost[name] == null) {
-				Logger.error("particle " + name + " not found");
-				return null;
-			}
-			
-			return _cacheBmdHost[name] as BitmapData;
-		}
 		
 		public function getTextImage(str:String):Image {
-			var bmd:BitmapData = getBitmapData(Resources.FONTS_PACK, "lat");
+			var bmd:BitmapData = getBitmapData("lat", Resources.INTRO_PACK);
 			if (bmd == null)
 				return null;
 			
@@ -377,81 +386,6 @@ package com.grabbers.manager
 			}
 			
 			return Image.fromBitmap(new Bitmap(bmdNew));
-		}
-		
-		public function getAtlasTexture(url:String, imgAsset:String, key:String):Texture {
-			var texTok:String = getCacheToken(url, imgAsset, key);
-			if (_cacheTex[texTok] != null) {
-				return _cacheTex[texTok] as Texture;
-			}
-			
-			var bmd:BitmapData = getBitmapData(url, imgAsset);
-			if (bmd == null) {
-				return null;
-			}
-			
-			_cacheTexAtlas[texTok] = new TextureAtlas(Texture.fromBitmapData(bmd), _spriteAssetsXml[imgAsset]);		
-			_cacheTex[texTok] = (_cacheTexAtlas[texTok] as TextureAtlas).getTexture(key);
-			return _cacheTex[texTok] as Texture;
-		}	
-		
-		public function getUniqueBitmapData(key:String):BitmapData {
-			if (_cacheBmdUnique[key] != null)
-				return _cacheBmdUnique[key] as BitmapData;
-			
-			for (var str:String in _swfAssets) {
-				var data:BitmapData = getBitmapData(str, key, true);
-				if (data != null) {
-					_cacheBmdUnique[key] = data;
-					return data;
-				}
-			}
-			return null;
-		}
-		
-		public function getUniqueTexture(key:String):Texture {
-			if (_cacheTexUnique[key] != null)
-				return _cacheTexUnique[key] as Texture;
-			
-			var bmd:BitmapData = getUniqueBitmapData(key);
-			if (bmd != null) {
-				_cacheTexUnique[key] = Texture.fromBitmapData(bmd, false);
-				return _cacheTexUnique[key] as Texture;
-			}
-			
-			return null;
-		}
-		
-		public function getBitmapData(url:String, key:String, bTry:Boolean = false):BitmapData {
-			var bmdTok:String = getCacheToken(url, key);
-			if (_cacheBmd[bmdTok] == null) {
-				if (_swfAssets[url] == null) {
-					if (!bTry)
-						Logger.error("asset " + url + " not exist");
-					return null;
-				}
-				
-				var claz:Class;
-				try {
-					claz = (_swfAssets[url] as ApplicationDomain).getDefinition(key) as Class;
-				} catch (e:Error) {
-					if (!bTry)
-						Logger.error("definition " + key + " not exist in " + url);
-					return null;
-				}
-				
-				var bmd:BitmapData = new claz() as BitmapData;
-				if (bmd == null) {
-					if (!bTry)
-						Logger.error("definition " + key + " in " + url + " is not a image data");
-					return null;
-				}
-				
-				_cacheBmd[bmdTok] = bmd;
-			}
-			
-			//trace(bmdTok);
-			return _cacheBmd[bmdTok];
 		}
 		
 		

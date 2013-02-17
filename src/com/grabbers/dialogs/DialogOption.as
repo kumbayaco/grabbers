@@ -21,14 +21,14 @@ package com.grabbers.dialogs
 			if (_btnBack != null) {
 				_btnBack.handlerTrigger = function(obj:UICheckButton):void {
 					form.hide();
-					(form.parent as UIScene).execCommand(form.name, "back_caption");
+					(form.parent as UIScene).execCommand(form.name, "back_caption", {});
 				};
 			}
 			
 			_btnVolu = form.getChildByName("set_volume_caption") as UICheckButton;
 			if (_btnVolu != null) {
 				_btnVolu.handlerTrigger = function(obj:UICheckButton):void {
-					(form.parent as UIScene).execCommand(form.name, "set_volume_caption");
+					(form.parent as UIScene).execCommand(form.name, "set_volume_caption", {});
 				};
 			}
 		}

@@ -42,7 +42,7 @@ package com.grabbers.scene
 			if (!super.enter())
 				return false;
 			
-			App.soundManager.playTheme("menu_theme");
+			App.soundManager.playTheme("main_theme");
 			return true;
 		}
 		
@@ -54,13 +54,7 @@ package com.grabbers.scene
 			return [
 				Resources.CREDITS_PACK,
 				Resources.GUI_PACK,
-				Resources.MAP_PACK,
-				Resources.MENU_PACK,
-				Resources.TROPHY_PACK,
-				Resources.ANIMATION_PACK,
-				Resources.SFX_FILES,
-				Resources.VO_FILES,
-				Resources.THEME_FILES
+				Resources.MENU_PACK
 			];
 		}
 		
@@ -76,7 +70,7 @@ package com.grabbers.scene
 			App.sceneManager.enterScene(SceneManager.SCENE_MAP);
 		}
 		
-		override public function execCommand(childName:String, command:String):void {
+		override public function execCommand(childName:String, command:String, params:Object):void {
 			switch (childName) {
 				case "exit_game_dialog": {
 					switch (command) {

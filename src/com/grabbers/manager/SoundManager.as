@@ -23,11 +23,11 @@ package com.grabbers.manager
 				_musicChannelCurr.stop();
 			}
 			
-			var sound:Sound = App.resourceManager.getSound(Resources.THEME_FILES, key + ".mp3");
-			if (sound != null) {
-				_musicChannelCurr = sound.play(0, int.MAX_VALUE);
-				_musicChannelCurr.soundTransform = _musicSoundTransform;
-			}
+//			var sound:Sound = App.resourceManager.getSound(Resources.THEME_FILES, key + ".mp3");
+//			if (sound != null) {
+//				_musicChannelCurr = sound.play(0, int.MAX_VALUE);
+//				_musicChannelCurr.soundTransform = _musicSoundTransform;
+//			}
 		}
 		
 		public function playSfx(key:String):void {
@@ -35,11 +35,11 @@ package com.grabbers.manager
 				_sfxChannelCurr.stop();
 			}
 			
-			var sound:Sound = App.resourceManager.getSound(Resources.SFX_FILES, key + ".mp3");
-			if (sound != null) {
-				_sfxChannelCurr = sound.play();
-				_sfxChannelCurr.soundTransform = _sfxSoundTransform;
-			}
+//			var sound:Sound = App.resourceManager.getSound(Resources.SFX_FILES, key + ".mp3");
+//			if (sound != null) {
+//				_sfxChannelCurr = sound.play();
+//				_sfxChannelCurr.soundTransform = _sfxSoundTransform;
+//			}
 		}
 		
 		public function setThemeVol(vol:uint):void {

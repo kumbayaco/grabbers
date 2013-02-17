@@ -7,8 +7,10 @@ package com.grabbers.application
 	import flash.display.Stage;
 	import flash.display.StageScaleMode;
 	import flash.events.Event;
+	import flash.geom.Rectangle;
 	
 	import starling.core.Starling;
+	
 	import test.TestGame;
 	
 //	[SWF(width="1280", height="768", backgroundColor="#D1C4AC", frameRate="60")]
@@ -25,7 +27,7 @@ package com.grabbers.application
 		private function addToStageListener(e:Event):void {
 			removeEventListener(Event.ADDED_TO_STAGE, addToStageListener);
 			
-			
+//			stage.scaleMode = StageScaleMode.EXACT_FIT;
 			// Initialize Starling object.
 			myStarling = new Starling(Game, stage);
 //			myStarling = new Starling(TestGame, stage);
@@ -35,6 +37,8 @@ package com.grabbers.application
 			
 			// Show statistics for memory usage and fps.
 			myStarling.showStats = true;
+			
+			myStarling.viewPort = new Rectangle(0, 0, stage.stageWidth, stage.stageHeight);
 			
 			// Position stats.
 			myStarling.showStatsAt("left", "bottom");

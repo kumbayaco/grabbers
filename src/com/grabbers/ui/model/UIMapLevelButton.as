@@ -1,5 +1,6 @@
 package com.grabbers.ui.model
 {
+	import com.grabbers.core.bean.LevelInfo;
 	import com.grabbers.globals.App;
 	import com.grabbers.globals.ScriptHelper;
 	import com.grabbers.manager.ResourceManager;
@@ -7,7 +8,9 @@ package com.grabbers.ui.model
 	import com.grabbers.ui.UIObjectFactory;
 	
 	import flash.geom.Point;
+	import flash.utils.Dictionary;
 	
+	import starling.display.DisplayObject;
 	import starling.display.DisplayObjectContainer;
 	import starling.display.Image;
 	
@@ -20,17 +23,19 @@ package com.grabbers.ui.model
 			enable:			function(str:String, obj:UIMapLevelButton):void {obj._enable = ScriptHelper.parseBoolean(str);}
 		};
 		
+		public var handlerTrigger:Function; 
 		protected var _size:Point = new Point();
 		protected var _pos:Point = new Point();
 		protected var _enable:Boolean = true;
 		protected var _imgLevel:Image;
+		protected var _objMap:Dictionary = new Dictionary();
 		
 		public function UIMapLevelButton()
 		{
 			super();
 		}
 		
-		override public function init(texPack:String, xml:XML, parentW:uint, parentH:uint):Boolean 
+		override public function init(xml:XML, parentW:uint, parentH:uint, texPack:String):Boolean 
 		{
 			/*
 			<level_button name="st1_forest01" pos="0, 183">
@@ -58,7 +63,7 @@ package com.grabbers.ui.model
 			return true;
 		}
 		
-		override public function initBasic(vXml:Vector.<XML>, parentW:uint, parentH:uint):Boolean 
+		override public function initBasic(vXml:Vector.<XML>, parentW:uint, parentH:uint, texPack:String):Boolean
 		{
 			/*
 			<maplevelbutton name="level_button" size="64, 64" visible="true" enabled="false">
@@ -102,11 +107,11 @@ package com.grabbers.ui.model
 						var xmlList:XMLList = xml.children();
 						for each (var xmlChild:XML in xmlList) {
 							var childName:String = xmlChild.name();
-							var uiObj:UIObject = UIObjectFactory.createObject(childName, parentW, parentH);
-							var vXmls:Vector.<XML> = UIObjectFactory.getObjectBasicXml(childName);
-							if (uiObj == null || !uiObj.init(null, xmlChild, _size.x, _size.y))
+							var uiObj:UIObject = UIObjectFactory.createObject(childName, parentW, parentH, texPack);
+							if (uiObj == null || !uiObj.init(xmlChild, _size.x, _size.y, texPack))
 								continue;
 							
+							_objMap[uiObj.name] = uiObj;
 							addChild(uiObj);
 						}	
 						break;
@@ -114,6 +119,89 @@ package com.grabbers.ui.model
 			}
 			
 			return true;
+		}
+		
+		/**
+		 * 
+		 * @param levelState
+		 * @param levelStar: only available when levelState != LEVEL_LOCKED.
+		 * 
+		 */		
+		public function setLevelInfo(levelInfo:LevelInfo):void {
+			removeChildren();
+			switch (levelInfo.levelState) {
+				case LevelInfo.LEVEL_LOCKED:
+					if (_objMap["locked_picture"] != null)
+						addChild(_objMap["locked_picture"] as DisplayObject);
+					break;
+				
+				case LevelInfo.LEVEL_UNLOCKED:
+					if (_objMap["unlocked_picture"] != null) 
+						addChild(_objMap["unlocked_picture"] as DisplayObject);
+					break;
+				
+				case LevelInfo.LEVEL_FLAG_NORMAL:
+					if (_objMap["normal_flag_picture"] != null) 
+						addChild(_objMap["normal_flag_picture"] as DisplayObject);
+					break;
+				
+				case LevelInfo.LEVEL_FLAG_HARD:
+					if (_objMap["hard_flag_picture"] != null) 
+						addChild(_objMap["hard_flag_picture"] as DisplayObject);
+					break;
+				
+				case LevelInfo.LEVEL_FLAG_EXPERT:
+					if (_objMap["expert_flag_picture"] != null) 
+						addChild(_objMap["expert_flag_picture"] as DisplayObject);
+					break;
+			}
+			
+			if (levelInfo.levelState != LevelInfo.LEVEL_LOCKED) {
+				if (_objMap["number"] != null) 
+					addChild(_objMap["number"] as DisplayObject);
+				
+				switch (levelInfo.star) {
+					case LevelInfo.STAR_NORMAL:
+						if (_objMap["normal_star_picture"] != null)
+							addChild(_objMap["normal_star_picture"]);
+						break;
+					
+					case LevelInfo.STAR_HARD:
+						if (_objMap["hard_star_picture"] != null)
+							addChild(_objMap["hard_star_picture"]);
+						break;
+					
+					case LevelInfo.STAR_EXPERT:
+						if (_objMap["expert_star_picture"] != null)
+							addChild(_objMap["expert_star_picture"]);
+						break;
+				}
+				
+				for (var i:uint = 0; i < numChildren; i++) {
+					var child:UIActiveElement = getChildAt(i) as UIActiveElement;
+					if (child == null)
+						continue;
+					child.handlerTrigger = onClick;
+				}
+			}			
+		}
+		
+		public function set select(bSel:Boolean):void {
+			var img:UIBitmap = _objMap["selection"] as UIBitmap;
+			if (img == null)
+				return;
+			
+			if (bSel) {
+				addChildAt(img, 0);
+			} else {
+				if (contains(img))
+					removeChild(img);
+			}
+		}
+		
+		protected function onClick(btn:UIActiveElement):void {
+			if (handlerTrigger != null)
+				handlerTrigger(this);
 		}
 	}
 }

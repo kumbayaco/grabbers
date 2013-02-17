@@ -21,20 +21,23 @@ package com.grabbers.ui.model
 	public class UICheckButton extends UIObject
 	{
 		static protected const _parser:Object = {
-			name:			function(str:String, obj:UICheckButton):void {obj.name = str;},
+			name:			function(str:String, obj:UICheckButton):void {obj.name = str.replace(/\W/g, "");},
 			size: 			function(str:String, obj:UICheckButton):void {obj._size = ScriptHelper.parsePoint(str);},
 			pos: 			function(str:String, obj:UICheckButton):void {obj._pos = ScriptHelper.parsePoint(str);},
 			font_size:		function(str:String, obj:UICheckButton):void {obj._fontSize = ScriptHelper.parseNumber(str);},
 //			add_caption:	function(str:String, obj:UICheckButton):void {obj._bAddText = ScriptHelper.parseBoolean(str);},
 			text_shift:		function(str:String, obj:UICheckButton):void {obj._textShift = ScriptHelper.parseNumber(str);},
 			texture_name:	function(str:String, obj:UICheckButton):void {
-				var vBmp:Vector.<BitmapData> = App.resourceManager.getButtonBmpdata("", str);
+				var vBmp:Vector.<BitmapData> = App.resourceManager.getBitmapDataTwin(str);
 				if (vBmp == null)
 					return;
 				obj._bgUp = Texture.fromBitmapData(vBmp[0]);
 				obj._bgDown = Texture.fromBitmapData(vBmp[1]);
+				if (obj._bg != null && obj.contains(obj._bg))
+					obj.removeChild(obj._bg);
 				obj._bg = new Image(obj._bgUp);
-				obj._bg.width = obj._size.x - 50;
+				
+				obj._bg.width = obj._size.x;
 				obj._bg.height = obj._size.y;
 				obj.addChild(obj._bg);
 			},
@@ -65,7 +68,7 @@ package com.grabbers.ui.model
 			super();
 		}
 		
-		override public function init(texPack:String, xml:XML, parentW:uint, parentH:uint):Boolean 
+		override public function init(xml:XML, parentW:uint, parentH:uint, texPack:String):Boolean 
 		{
 			for each (var att:XML in xml.attributes()) {
 				var key:String = att.name().toString();
@@ -73,13 +76,18 @@ package com.grabbers.ui.model
 				if (_parser.hasOwnProperty(key)) {
 					_parser[key](val, this);
 				}
-			}	
+			}				
+			
+			if (_bg != null) {
+				_bg.width = _size.x;
+				_bg.height = _size.y;
+			}
 			
 			if (_bAddText) {
 				text = App.resourceManager.getTextString(name + "_caption");
 			}		
 			
-			LayoutUtil.setLayoutInfo(this, ScriptHelper.parseAnchorType(xml), _pos.x, _pos.y, parentW, parentH);
+			LayoutUtil.setLayoutInfoEx(this, ScriptHelper.parseAnchorType(xml), _pos.x, _pos.y, _size.x, _size.y, parentW, parentH);
 			
 			addEventListener(TouchEvent.TOUCH, onTouch);
 			return true;
@@ -109,7 +117,7 @@ package com.grabbers.ui.model
 			addChild(_text);
 		}
 		
-		override public function initBasic(vXml:Vector.<XML>, parentW:uint, parentH:uint):Boolean 
+		override public function initBasic(vXml:Vector.<XML>, parentW:uint, parentH:uint, texPack:String):Boolean 
 		{
 			/*
 			<checkbutton name="basic_button" pos="0, 0" size="224, 40" font_size="24" text_shift="1" font_scale="true" texture_name="txtbtn_menu" select_sfx_name="selectmenu" 
@@ -169,7 +177,8 @@ package com.grabbers.ui.model
 				_curState = UP_STATE;
 			}
 			
-			_bg.texture = _curState==UP_STATE ? _bgUp : _bgDown;
+			if (_bg != null)
+				_bg.texture = _curState==UP_STATE ? _bgUp : _bgDown;
 		}
 		
 		private function onTouch(evt:TouchEvent):void {
@@ -183,7 +192,8 @@ package com.grabbers.ui.model
 					App.soundManager.playSfx(_sfxHover);
 			}
 			
-			_bg.texture = _curState==UP_STATE ? _bgUp : _bgDown;
+			if (_bg != null)
+				_bg.texture = _curState==UP_STATE ? _bgUp : _bgDown;
 		}
 	}
 }

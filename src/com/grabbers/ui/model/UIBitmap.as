@@ -7,8 +7,10 @@ package com.grabbers.ui.model
 	import com.grabbers.ui.LayoutUtil;
 	import com.grabbers.ui.model.UIObject;
 	
+	import flash.display3D.IndexBuffer3D;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	import flash.globalization.NumberFormatter;
 	
 	import starling.animation.IAnimatable;
 	import starling.core.Starling;
@@ -35,6 +37,10 @@ package com.grabbers.ui.model
 		private var _speedBlink:Number;
 		private var _factorBlink:Number;
 		private var _initSize:Point;
+		private var _initColor:uint;
+		private var _lastTimestamp:Number = 0;
+		private var _pulseDir:int = 0;
+		private var _blinkDir:int = 0;
 		
 		public function UIBitmap() {		
 		}
@@ -43,13 +49,13 @@ package com.grabbers.ui.model
 			return _image;
 		}
 		
-		override public function init(texPack:String, xml:XML, parentW:uint, parentH:uint):Boolean {
+		override public function init(xml:XML, parentW:uint, parentH:uint, texPack:String):Boolean {
 			var pos:Point = ScriptHelper.parsePoint(xml.@pos);
 			var size:Point = ScriptHelper.parsePoint(xml.@size);
 			
 			var tex:Texture;
 			if (xml.hasOwnProperty("@texture_name")) {
-				tex = App.resourceManager.getTexture(texPack, xml.@texture_name);
+				tex = App.resourceManager.getTexture(xml.@texture_name, texPack);
 				if (tex == null) {
 					Logger.error(xml.@texture_name + " not found in " + texPack);
 					return false;
@@ -67,8 +73,8 @@ package com.grabbers.ui.model
 			
 			if (xml.hasOwnProperty("@center_pos")) {
 				var co:Point = ScriptHelper.parsePoint(xml.@center_pos);
-				co.x = (App.stage.stageWidth >> 1) + co.x;
-				co.y = (App.stage.stageHeight >> 1) - co.y;
+				co.x = (App.sceneWidth >> 1) + co.x;
+				co.y = (App.sceneHeight >> 1) - co.y;
 				LayoutUtil.setLayoutInfo(this, ScriptHelper.parseAnchorType(xml), pos.x, pos.y, parentW, parentH, co);
 			} else {
 				LayoutUtil.setLayoutInfo(this, ScriptHelper.parseAnchorType(xml), pos.x, pos.y, parentW, parentH, null);
@@ -87,6 +93,7 @@ package com.grabbers.ui.model
 			
 			if (xml.hasOwnProperty("@color")) {
 				var color:uint = ScriptHelper.parseColor(xml.@color);
+				_initColor = color;
 				_image.color = color;
 				_image.alpha = (Color.getAlpha(color)) / 255;
 			}
@@ -187,21 +194,41 @@ package com.grabbers.ui.model
 				var speedNow:Number = _speedRot * 0.2 + _speedRot  * (1 - portion) * 0.8;
 				rotation = rotation + _rotDirect * speedNow * time;
 			}
-			
+				
 			if (_speedPulse > 0 && _factorPulse > 0) {
-				//				width = _initSize.x + _speedPulse * _factorPulse * time * 50;
-				//				height = _initSize.y + _speedPulse * _factorPulse * time * 50;
+				if (width < _initSize.x - _factorPulse) {
+					_pulseDir = 1;
+				}
+				if (width > _initSize.x + _factorPulse) {
+					_pulseDir = -1;
+				}
+				
+				if (_pulseDir == 0)
+					_pulseDir = 1;
+				
+				width += _speedPulse * _pulseDir * time * 5;
+				height += _speedPulse * _pulseDir * time * 5;
 			}
 			
 			if (_speedBlink > 0 && _factorBlink > 0) {
-				//var l:Number = 255 - _speedBlink * _factorBlink * time * 200;
-				//color = Color.argb(l, l, l, l);
+				var a:Number = _image.alpha;
+				var ia:Number = Color.getAlpha(_initColor) / 255;
+				if (a > ia + _factorBlink/255 || a > 0.999)
+					_blinkDir = -1;
+				if (a < ia - _factorBlink/255 || a < 0.001)
+					_blinkDir = 1;
+				
+				var r:int = Color.getRed(_image.color);
+				var g:int = Color.getGreen(_image.color);
+				var b:int = Color.getBlue(_image.color);
+				
+				a += _blinkDir * time * _speedBlink / 255;
+//				r += _blinkDir * time * _speedBlink;
+//				g += _blinkDir * time * _speedBlink;
+//				b += _blinkDir * time * _speedBlink;
+				_image.color = Color.argb(255, r, g, b);
+				_image.alpha = a;
 			}
-		}
-		
-		override public function initBasic(vXml:Vector.<XML>, parentW:uint, parentH:uint):Boolean 
-		{
-			return true;
 		}
 	}
 }

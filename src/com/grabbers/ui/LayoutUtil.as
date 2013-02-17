@@ -13,14 +13,13 @@ package com.grabbers.ui
 		public function LayoutUtil() {
 		}
 		
-		static public function setLayoutInfo(target:UIObject, anchor:Anchor, x:int, y:int, parentW:uint, parentH:uint, co:Point=null):void {
+		static public function setLayoutInfoEx(target:DisplayObject, anchor:Anchor, x:int, y:int, w:uint, h:uint, parentW:uint, parentH:uint, co:Point=null):void {
 			if (target == null || anchor == null) {
 				Logger.error("setLayoutInfo parameters error");
 				return;
 			}
 			
-			var w:uint = target.width / target.scaleX;
-			var h:uint = target.height / target.scaleY;
+			
 			switch (anchor.horzAnchor) {
 				case Anchor.LEFT_ANCHOR:
 					if (co != null) {
@@ -28,6 +27,7 @@ package com.grabbers.ui
 						target.x = co.x;
 					} else {
 						target.pivotX = 0;
+						target.x = x;
 					}								
 					break;
 				
@@ -83,6 +83,12 @@ package com.grabbers.ui
 					}
 					break;
 			}
+		}
+		
+		static public function setLayoutInfo(target:DisplayObject, anchor:Anchor, x:int, y:int, parentW:uint, parentH:uint, co:Point=null):void {
+			var w:uint = target.width / target.scaleX;
+			var h:uint = target.height / target.scaleY;
+			setLayoutInfoEx(target, anchor, x, y, w, h, parentW, parentH, co);
 		}
 	}
 }
